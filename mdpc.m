@@ -1,6 +1,7 @@
 classdef mdpc < mceliece_code
-    %MDPC Summary of this class goes here
-    %   Detailed explanation goes here
+    %MDPC Moderate-Density Parity-Check codes class
+    %  
+    %   
     
     properties
         r ;
@@ -56,7 +57,7 @@ classdef mdpc < mceliece_code
         end
         
         function x = decode(obj, y)
-            %DECODE Summary of this function goes here
+            %DECODE Decoding of Y vector
             %   Detailed explanation goes here
             x = [];
             if length(y) ~= obj.n
@@ -77,8 +78,10 @@ classdef mdpc < mceliece_code
     methods (Access = private)
         
         function obj = construct_matrices(obj)
-            %construct_matrices Summary of this function goes here
-            %   Detailed explanation goes here
+            %CONSTRUCT_MATRICES Constructing generator and parity-check 
+            %matrices of MPDC-code
+            %   OBJ = CONSTRUCT_MATRICES(OBJ)
+            %
             
             h0 = [ones(1,obj.w/obj.n0) zeros(1,obj.p-obj.w/obj.n0)];
             h0 = [h0(randperm(obj.n/obj.n0)) h0(randperm(obj.n/obj.n0))];
@@ -105,10 +108,9 @@ classdef mdpc < mceliece_code
         end
         
         function y = BitFlip(obj, x, iteration)
-            % Hard-decision/bit flipping sum product algorithm LDPC decoder
+            % Bit flipping algorithm decoder
             %
-            %  x         : Received signal vector (column vector)
-            %  H         : LDPC matrix
+            %  x         : Received vector
             %  iteration : Number of iteration
             %
             %  y      : Decoded vector (0/1) 

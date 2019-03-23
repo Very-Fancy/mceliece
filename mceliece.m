@@ -18,7 +18,7 @@ classdef mceliece
                 code_type = 0;
             end
             if nargin < 2 || isempty(t)
-                t = 4;
+                t = 3;
             end
             
             obj.t = t;
