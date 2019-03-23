@@ -1,6 +1,5 @@
 classdef mceliece
-    %MCELIECE Implementation of McEliece cryptosystem variants
-    %   base_code implements mceliece_code class
+    %MCELIECE Class implements McEliece cryptosystem
     
     properties (Access = private)
         base_code mceliece_code = mdpc
@@ -10,10 +9,14 @@ classdef mceliece
     methods 
         function obj = mceliece(code_type, t, params)
             %MCELIECE Construct an instance of this class
-            %   mceliece cryptosystem based on: 
-            %   mdpc (code_type = 0, params = [n r w] default [2 137 14])
+            %   OBJ = MCELIECE(CODE_TYPE, T, PARAMS) Creates cryptosystem 
+            %   based on specified codes class. 
             %
-            %   t - default weight of error vector
+            %   CODE_TYPE:  0 - MDPC-codes (default [n_0 = 2 p = 137 w =14])
+            %
+            %   PARAMS:  code parameters; for MDPC: [n0 p w]
+            %
+            %   T:  default weight of error vector
             if nargin < 1 || isempty(code_type)
                 code_type = 0;
             end
@@ -23,6 +26,7 @@ classdef mceliece
             
             obj.t = t;
             
+          
             switch code_type
                 case 0
                     if nargin<3 || isempty(params)
@@ -31,15 +35,18 @@ classdef mceliece
                         obj.base_code = mdpc(params);
                     end
             end 
+            
             [k n] = obj.get_params();
-            disp(sprintf('McEliece system %s-based\nMessage length %d\nEncrypted text length %d',...
+            disp(sprintf('\nMcEliece system %s-based\nMessage length %d\nEncrypted text length %d\n',...
                 class(obj.base_code), k,n));
         end
         
         function x = encrypt(obj,m, t)
-            %ENCRYPT Message encryption
-            %   m - message (length in accordance with code parameters(
-            %   t - number of errors for error vector (uses default if not
+            %X = ENCRYPT(M, T) Message encryption
+            %   M:  message (length in accordance with code parameter K from
+            %   OBJ.GET_PARAMS)
+            %
+            %   T:  number of errors for error vector (uses default OBJ.T if not
             %   set)
             
             if nargin<3 || isempty(t)
@@ -54,8 +61,9 @@ classdef mceliece
         end
         
         function y = decrypt(obj,x)
-            %DECRYPT Message decryption
-            %              
+            %Y = DECRYPT(X) Message decryption
+            %  
+            
             y = obj.base_code.decode(x);
         end
         
