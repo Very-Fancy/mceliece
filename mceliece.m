@@ -26,13 +26,21 @@ classdef mceliece
             
             obj.t = t;
             
-          
+            if code_type ~= 0
+                me = MException('MCELIECE:wrongParam','Code type is wrong, only 0 (MDPC) is supported');
+                me.throw;
+            end
             switch code_type
                 case 0
                     if nargin<3 || isempty(params)
                         obj.base_code = mdpc();
                     else
-                        obj.base_code = mdpc(params);
+                        if params(1) ~= 2
+                            me = MException('MCELIECE:wrongParam','Code parameter n0 (param(1)) must be 2');
+                            me.throw;
+                        else
+                            obj.base_code = mdpc(params);
+                        end
                     end
             end 
             
