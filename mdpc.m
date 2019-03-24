@@ -1,6 +1,5 @@
 classdef mdpc < mceliece_code
-    %MDPC Summary of this class goes here
-    %   Detailed explanation goes here
+    %MDPC Moderate-Density Parity-Check codes class   
     
     properties
         r ;
@@ -19,6 +18,7 @@ classdef mdpc < mceliece_code
         function obj = mdpc(params)
             %MDPC Construct an instance of this class
             %   Detailed explanation goes here
+            
             if nargin<1 || isempty(params) 
                 params = [2 137 14];
             end
@@ -56,7 +56,7 @@ classdef mdpc < mceliece_code
         end
         
         function x = decode(obj, y)
-            %DECODE Summary of this function goes here
+            %DECODE Decoding of Y vector
             %   Detailed explanation goes here
             x = [];
             if length(y) ~= obj.n
@@ -77,8 +77,10 @@ classdef mdpc < mceliece_code
     methods (Access = private)
         
         function obj = construct_matrices(obj)
-            %construct_matrices Summary of this function goes here
-            %   Detailed explanation goes here
+            %CONSTRUCT_MATRICES Constructing generator and parity-check 
+            %matrices of MPDC-code
+            %   OBJ = CONSTRUCT_MATRICES(OBJ)
+            %
             
             h0 = [ones(1,obj.w/obj.n0) zeros(1,obj.p-obj.w/obj.n0)];
             h0 = [h0(randperm(obj.n/obj.n0)) h0(randperm(obj.n/obj.n0))];
@@ -104,54 +106,58 @@ classdef mdpc < mceliece_code
             obj.g = double(g.x);           
         end
         
-        function y = BitFlip(obj, x, iteration)
+        function vHat = BitFlip(obj, ci, iteration)
             % Hard-decision/bit flipping sum product algorithm LDPC decoder
             %
-            %  x         : Received signal vector (column vector)
+            %  rx        : Received signal vector
             %  H         : LDPC matrix
             %  iteration : Number of iteration
             %
-            %  y      : Decoded vector (0/1) 
-
+            %  vHat      : Decoded vector (0/1) 
+            %
+            %
+            % Copyright Bagawan S. Nugroho, 2007 
+            % http://bsnugroho.googlepages.com
 
             [M N] = size(obj.h);
-            x = x';
+            ci = ci';         
             rji = zeros(M, N);
+            qij = obj.h.*repmat(ci, M, 1);
 
-            qij = obj.h.*repmat(x, M, 1);
             n = 1;
-            s = mod(x*obj.h',2);
-            
+            s = mod(ci*obj.h',2);
             while n < iteration && nnz(s)~=0
                for i = 1:M
-                  c1 = find(obj.h(i, :));
+                  c1 = find(obj.h(i, :)); 
                   for k = 1:length(c1)
                      rji(i, c1(k)) = mod(sum(qij(i, c1)) + qij(i, c1(k)), 2);
                   end
-               end
+               end 
 
                for j = 1:N
                   r1 = find(obj.h(:, j));
-                  nOnes = length(find(rji(r1, j)));
+                  numOfOnes = length(find(rji(r1, j)));
+                  
                   for k = 1:length(r1)        
-                     if nOnes + x(j) >= length(r1) - nOnes + rji(r1(k), j)
+                     if numOfOnes + ci(j) >= length(r1) - numOfOnes + rji(r1(k), j)
                         qij(r1(k), j) = 1;
                      else
                         qij(r1(k), j) = 0;
                      end
-                  end
 
-                  if nOnes + x(j) >= length(r1) - nOnes
-                     y(j) = 0;
+                  end % for k
+
+                  if numOfOnes + ci(j) >= length(r1) - numOfOnes
+                     vHat(j) = 0;
                   else
-                     y(j) = 1;
+                     vHat(j) = 1;
                   end
 
-               end 
-               s = mod(y*obj.h',2);
+               end % for j
+               s = mod(vHat*obj.h',2);
                n = n + 1;
-            end  
-            y = y(1,1:obj.n-obj.r);            
+            end
+            vHat = vHat(1,1:obj.n-obj.r);            
         end
     end
 end
